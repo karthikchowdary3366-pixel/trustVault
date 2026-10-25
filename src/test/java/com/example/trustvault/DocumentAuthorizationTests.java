@@ -371,6 +371,20 @@ class DocumentAuthorizationTests {
 	}
 
 	@Test
+	void ownerAuditActivityIsRetainedAfterDocumentIsDeleted() throws Exception {
+		VaultDocument temporary = documents.upload("owner", "Temporary file", "Finance", null,
+				new MockMultipartFile("file", "temp.txt", MediaType.TEXT_PLAIN_VALUE,
+						"temporary content".getBytes(StandardCharsets.UTF_8)));
+		documents.delete("owner", temporary.getId());
+
+		mvc.perform(get("/owner/activity")
+				.with(SecurityMockMvcRequestPostProcessors.user("owner").roles("OWNER")))
+				.andExpect(status().isOk())
+				.andExpect(content().string(containsString(temporary.getId())))
+				.andExpect(content().string(containsString("Document deleted")));
+	}
+
+	@Test
 	void administratorDoesNotAutomaticallyGainDocumentReadAccess() throws Exception {
 		mvc.perform(get("/documents")
 				.with(SecurityMockMvcRequestPostProcessors.user("admin").roles("ADMIN")))

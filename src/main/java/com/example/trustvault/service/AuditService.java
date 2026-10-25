@@ -78,14 +78,19 @@ public class AuditService {
 		return events.findAllByOrderByIdDesc();
 	}
 
+	/**
+	 * Events for every document or folder the owner currently owns or ever created, so activity
+	 * remains visible after the document or folder has been deleted.
+	 */
 	@Transactional(readOnly = true)
-	public List<AuditEvent> latestEventsForDocuments(Set<String> documentIds) {
-		if (documentIds.isEmpty()) {
+	public List<AuditEvent> latestEventsForOwner(String ownerUsername, Set<String> currentlyOwnedIds) {
+		Set<String> ownedIds = new HashSet<>(currentlyOwnedIds);
+		ownedIds.addAll(events.findDocumentIdsByActorAndActions(ownerUsername, List.of("UPLOAD", "CREATE_FOLDER")));
+		if (ownedIds.isEmpty()) {
 			return List.of();
 		}
-		Set<String> ownedDocumentIds = new HashSet<>(documentIds);
 		return events.findAllByOrderByIdDesc().stream()
-				.filter(event -> event.getDocumentId() != null && ownedDocumentIds.contains(event.getDocumentId()))
+				.filter(event -> event.getDocumentId() != null && ownedIds.contains(event.getDocumentId()))
 				.toList();
 	}
 

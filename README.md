@@ -10,7 +10,7 @@ Requirements: Java 25 and the included Maven wrapper.
 .\mvnw.cmd spring-boot:run
 ```
 
-Open <http://localhost:8080> to view the welcome page, then select **Get started** to sign in. After successful sign-in, TrustVault opens the document workspace at `/documents`. On a new local database, the application seeds these **development-only** accounts:
+Open <https://trustvault-q0ew.onrender.com> to view the welcome page, then select **Get started** to sign in. After successful sign-in, TrustVault opens the document workspace at `/documents`. On a new local database, the application seeds these **development-only** accounts:
 
 | Role | Username | Password |
 |---|---|---|
