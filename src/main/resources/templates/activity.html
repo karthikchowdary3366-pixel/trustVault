@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Audit activity · TrustVault</title>
+	<link rel="stylesheet" th:href="@{/css/app.css}">
+	<script th:src="@{/js/theme.js}" defer></script>
+</head>
+<body>
+<header class="topbar">
+	<a class="brand" th:href="@{/documents}"><span class="brand-mark small">TV</span> TrustVault</a>
+	<nav><a th:href="@{/documents}">Documents</a>
+		<a th:if="${isAdmin}" th:href="@{/admin/users}">Users</a>
+		<a th:if="${isAdmin}" class="active" th:href="@{/admin/activity}">Audit activity</a>
+		<a th:unless="${isAdmin}" th:href="@{/owner/documents}">My uploads</a>
+		<a th:unless="${isAdmin}" class="active" th:href="@{/owner/activity}">Audit activity</a></nav>
+	<div class="user-menu"><span th:text="${username}">admin</span>
+		<a class="settings-link" th:href="@{/account/settings}" aria-label="Account settings" title="Account settings">
+			<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1-2.4 2.4-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6v.2h-3.4v-.2a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1-2.4-2.4.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.6-1H4v-3.4h.2a1.7 1.7 0 0 0 1.6-1 1.7 1.7 0 0 0-.3-1.9l-.1-.1 2.4-2.4.1.1a1.7 1.7 0 0 0 1.9.3 1.7 1.7 0 0 0 1-1.6V3h3.4v.2a1.7 1.7 0 0 0 1 1.6 1.7 1.7 0 0 0 1.9-.3l.1-.1 2.4 2.4-.1.1a1.7 1.7 0 0 0-.3 1.9 1.7 1.7 0 0 0 1.6 1h.2v3.4H21a1.7 1.7 0 0 0-1.6 1Z"></path></svg>
+		</a>
+		<form method="post" th:action="@{/logout}"><button class="link-button" type="submit">Sign out</button></form>
+	</div>
+</header>
+<main class="page">
+	<section class="page-heading"><div><p class="eyebrow" th:text="${isAdmin ? 'ADMINISTRATION' : 'OWNER WORKSPACE'}">WORKSPACE</p><h1>Audit activity</h1>
+		<p class="muted" th:text="${isAdmin ? 'Document reads, changes, permission updates, and denied attempts.' : 'Activity for documents you currently own, including reads, changes, permission updates, and denied attempts.'}">Document activity</p></div></section>
+	<div class="integrity-banner" th:classappend="${chainValid} ? ' valid' : ' invalid'">
+		<span class="integrity-dot"></span>
+		<strong th:text="${chainValid} ? 'Audit chain verified' : 'Audit chain integrity failure'">Audit chain status</strong>
+		<span th:text="${chainValid} ? 'HMAC signatures are valid.' : 'One or more records may have been modified.'">status</span>
+	</div>
+	<section class="panel documents-panel">
+		<div class="table-wrap">
+			<table><thead><tr><th>Time</th><th>Actor</th><th>Action</th><th>Document</th><th>Outcome</th><th>Details</th><th>Event signature</th></tr></thead>
+				<tbody><tr th:each="event : ${events}">
+					<td class="nowrap" th:text="${event.occurredAt}">time</td>
+					<td th:text="${event.actor}">actor</td>
+					<td><span class="category-pill" th:text="${event.action}">action</span></td>
+					<td class="mono" th:text="${event.documentId == null ? '—' : event.documentId}">id</td>
+					<td><span class="outcome" th:classappend="${event.allowed} ? ' allowed' : ' denied'" th:text="${event.allowed} ? 'Allowed' : 'Denied'">Allowed</span></td>
+					<td th:text="${event.details}">details</td>
+					<td class="mono signature" th:text="${event.eventHash}">hash</td>
+				</tr>
+				<tr th:if="${events.isEmpty()}"><td colspan="7" class="empty-inline">No activity recorded yet.</td></tr></tbody>
+			</table>
+		</div>
+	</section>
+	<footer th:text="${isAdmin ? 'Audit chain integrity is verified using the configured server-side HMAC key. See THREATS.md for the trust boundary.' : 'This view includes events for documents currently owned by your account. Audit chain integrity is verified using the configured server-side HMAC key.'}">Audit chain integrity is verified using the configured server-side HMAC key.</footer>
+</main>
+</body>
+</html>

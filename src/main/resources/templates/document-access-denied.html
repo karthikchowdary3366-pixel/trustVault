@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Access not granted · TrustVault</title>
+	<link rel="stylesheet" th:href="@{/css/app.css}">
+	<script th:src="@{/js/theme.js}" defer></script>
+</head>
+<body>
+<header class="topbar">
+	<a class="brand" th:href="@{/documents}"><span class="brand-mark small">TV</span> TrustVault</a>
+	<nav><a class="active" th:href="@{/documents}">Documents</a>
+		<a th:if="${role == 'VIEWER'}" th:href="@{/viewer/documents}">My documents</a></nav>
+	<div class="user-menu"><span th:text="${username}">user</span>
+		<a class="settings-link" th:href="@{/account/settings}" aria-label="Account settings" title="Account settings">
+			<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1-2.4 2.4-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6v.2h-3.4v-.2a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1-2.4-2.4.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.6-1H4v-3.4h.2a1.7 1.7 0 0 0 1.6-1 1.7 1.7 0 0 0-.3-1.9l-.1-.1 2.4-2.4.1.1a1.7 1.7 0 0 0 1.9.3 1.7 1.7 0 0 0 1-1.6V3h3.4v.2a1.7 1.7 0 0 0 1 1.6 1.7 1.7 0 0 0 1.9-.3l.1-.1 2.4 2.4-.1.1a1.7 1.7 0 0 0-.3 1.9 1.7 1.7 0 0 0 1.6 1h.2v3.4H21a1.7 1.7 0 0 0-1.6 1Z"></path></svg>
+		</a>
+		<form method="post" th:action="@{/logout}"><button class="link-button" type="submit">Sign out</button></form>
+	</div>
+</header>
+<main class="page narrow">
+	<section class="panel">
+		<p class="eyebrow">DOCUMENT ACCESS</p>
+		<h1>Access is not granted for you</h1>
+		<p class="muted">You can find this document in search, but an owner must grant you access before you can open, view, or download it.</p>
+		<a class="button secondary" th:href="${backUrl != null} ? ${backUrl} : (${role == 'VIEWER' and session.lastDocumentSearch == null} ? @{/viewer/documents} : @{/documents})">Back</a>
+	</section>
+</main>
+</body>
+</html>

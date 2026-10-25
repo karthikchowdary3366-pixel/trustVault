@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Folders · TrustVault</title>
+	<link rel="stylesheet" th:href="@{/css/app.css}">
+	<script th:src="@{/js/theme.js}" defer></script>
+</head>
+<body>
+<header class="topbar">
+	<a class="brand" th:href="@{/documents}"><span class="brand-mark small">TV</span> TrustVault</a>
+	<nav><a th:href="@{/documents}">Documents</a>
+		<a th:if="${role == 'VIEWER'}" th:href="@{/viewer/folders}">My folders</a>
+		<a th:if="${role == 'VIEWER'}" th:href="@{/viewer/documents}">My documents</a>
+		<a th:if="${role == 'OWNER'}" th:href="@{/owner/documents}">My uploads</a>
+		<a th:if="${role == 'OWNER'}" th:href="@{/owner/activity}">Audit activity</a></nav>
+	<div class="user-menu"><span th:text="${username}">user</span>
+		<a class="settings-link" th:href="@{/account/settings}" aria-label="Account settings" title="Account settings">
+			<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1-2.4 2.4-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6v.2h-3.4v-.2a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1-2.4-2.4.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.6-1H4v-3.4h.2a1.7 1.7 0 0 0 1.6-1 1.7 1.7 0 0 0-.3-1.9l-.1-.1 2.4-2.4.1.1a1.7 1.7 0 0 0 1.9.3 1.7 1.7 0 0 0 1-1.6V3h3.4v.2a1.7 1.7 0 0 0 1 1.6 1.7 1.7 0 0 0 1.9-.3l.1-.1 2.4 2.4-.1.1a1.7 1.7 0 0 0-.3 1.9 1.7 1.7 0 0 0 1.6 1h.2v3.4H21a1.7 1.7 0 0 0-1.6 1Z"></path></svg>
+		</a>
+		<form method="post" th:action="@{/logout}"><button class="link-button" type="submit">Sign out</button></form>
+	</div>
+</header>
+<main class="page narrow">
+	<section class="panel">
+		<div class="panel-heading">
+			<div>
+				<h2 th:text="${role == 'OWNER'} ? 'Manage your folders' : 'Your shared folders'">Folders</h2>
+				<p class="muted" th:text="${role == 'OWNER'} ? 'Organize documents into folders and grant folder-level access to viewers.' : 'View folders that have been shared with you. You can access only the documents in these folders that you have been granted access to.'"></p>
+			</div>
+			<a th:if="${role == 'OWNER'}" class="button primary" th:href="@{/folders/create}">Create folder</a>
+		</div>
+		<div class="empty-state" th:if="${folders.isEmpty()}">
+			<div class="empty-icon">◇</div>
+			<h3 th:text="${role == 'OWNER'} ? 'No folders yet' : 'No folders shared with you'">No folders</h3>
+			<p class="muted" th:text="${role == 'OWNER'} ? 'Create a folder to organize your documents.' : 'Ask an owner to share a folder with you.'"></p>
+			<a th:if="${role == 'OWNER'}" class="button primary" th:href="@{/folders/create}">Create your first folder</a>
+		</div>
+		<div class="table-wrap" th:if="${!folders.isEmpty()}">
+			<table>
+				<thead><tr><th>Folder</th><th>Description</th><th>Created</th><th></th></tr></thead>
+				<tbody>
+					<tr th:each="folder : ${folders}">
+						<td><a class="document-link" th:href="@{/folders/{id}(id=${folder.id})}" th:text="${folder.name}">Folder</a></td>
+						<td class="muted" th:text="${folder.description == null ? '—' : folder.description}">description</td>
+						<td class="muted" th:text="${folder.createdAt}">date</td>
+						<td><div class="document-actions">
+							<a class="button small-button secondary" th:href="@{/folders/{id}(id=${folder.id})}">Open</a>
+							<form th:if="${role == 'OWNER'}" method="post" th:action="@{/folders/{id}/delete(id=${folder.id})}"
+									onsubmit="return confirm('Delete this folder and all documents in it permanently? This cannot be undone.')">
+								<button class="button small-button danger-outline delete-button" type="submit"
+										aria-label="Delete folder" title="Delete folder">
+									<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M10 11v6m4-6v6M5 7l1 14h12l1-14M9 7V4h6v3"></path></svg>
+								</button>
+							</form>
+						</div></td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+	</section>
+</main>
+</body>
+</html>

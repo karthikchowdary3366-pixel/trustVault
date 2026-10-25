@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Upload a document · TrustVault</title>
+	<link rel="stylesheet" th:href="@{/css/app.css}">
+	<script th:src="@{/js/theme.js}" defer></script>
+	<script th:src="@{/js/grantee-select-all.js}" defer></script>
+</head>
+<body>
+<header class="topbar">
+	<a class="brand" th:href="@{/documents}"><span class="brand-mark small">TV</span> TrustVault</a>
+	<nav>
+		<a class="active" th:href="@{/documents}">Documents</a>
+		<a th:href="@{/owner/documents}">My uploads</a>
+		<a th:href="@{/owner/activity}">Audit activity</a>
+	</nav>
+	<div class="user-menu"><span th:text="${username}">owner</span>
+		<a class="settings-link" th:href="@{/account/settings}" aria-label="Account settings" title="Account settings">
+			<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1-2.4 2.4-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6v.2h-3.4v-.2a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1-2.4-2.4.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.6-1H4v-3.4h.2a1.7 1.7 0 0 0 1.6-1 1.7 1.7 0 0 0-.3-1.9l-.1-.1 2.4-2.4.1.1a1.7 1.7 0 0 0 1.9.3 1.7 1.7 0 0 0 1-1.6V3h3.4v.2a1.7 1.7 0 0 0 1 1.6 1.7 1.7 0 0 0 1.9-.3l.1-.1 2.4 2.4-.1.1a1.7 1.7 0 0 0-.3 1.9 1.7 1.7 0 0 0 1.6 1h.2v3.4H21a1.7 1.7 0 0 0-1.6 1Z"></path></svg>
+		</a>
+		<form method="post" th:action="@{/logout}"><button class="link-button" type="submit">Sign out</button></form>
+	</div>
+</header>
+<main class="page narrow">
+	<a class="back-link" th:href="@{/documents}">← Documents</a>
+	<section class="page-heading">
+		<div><p class="eyebrow">OWNER WORKSPACE</p><h1>Upload a document</h1>
+			<p class="muted">PDF, PNG, JPEG, UTF-8 text, Word, or Excel · up to 10 MB</p></div>
+	</section>
+	<section class="panel upload-panel">
+		<form method="post" enctype="multipart/form-data" th:action="@{/documents/upload}">
+			<label for="document-name">Document name</label><input id="document-name" name="name" maxlength="180" required>
+			<label for="document-category">Category</label><input id="document-category" name="category" maxlength="80" required placeholder="Contracts, HR, Finance…">
+			<div th:if="${targetFolder != null}">
+				<input type="hidden" name="folderId" th:value="${targetFolder.id}">
+				<p class="muted">Uploading to folder <strong th:text="${targetFolder.name}">Folder</strong></p>
+			</div>
+			<fieldset class="grantee-picker">
+				<legend>Share with <span class="muted">(optional)</span></legend>
+				<input id="grantee-search" type="search" placeholder="Search people by name, username, email, or role"
+						autocomplete="off" aria-label="Search people to share with">
+				<div class="grantee-list" id="grantee-list">
+					<label class="grantee-option select-all-option">
+						<input id="select-all-grantees" type="checkbox" th:disabled="${grantTargets.isEmpty()}">
+						<span>Select all matching people</span>
+					</label>
+					<label class="grantee-option" th:each="target : ${grantTargets}"
+							th:attr="data-search=${#strings.toLowerCase((target.fullName ?: '') + ' ' + target.username + ' ' + (target.email ?: '') + ' ' + target.role)}">
+						<input type="checkbox" name="grantees" th:value="${target.username}">
+						<span th:text="${(target.fullName != null and !#strings.isEmpty(target.fullName.trim()) ? target.fullName + ' (' + target.username + ')' : target.username) + ' · ' + target.role}">Name</span>
+					</label>
+					<p class="muted grantee-empty" id="grantee-empty" th:if="${grantTargets.isEmpty()}">No other active users available.</p>
+					<p class="muted grantee-empty" id="grantee-no-match" hidden>No matching users.</p>
+				</div>
+				<p class="muted grantee-count" id="grantee-count" aria-live="polite">0 selected</p>
+			</fieldset>
+			<label for="permission">Access level for selected people</label>
+			<select id="permission" name="permission">
+				<option value="READ">Read</option>
+				<option value="EDIT">Edit</option>
+				<option value="DELETE">Edit and delete</option>
+			</select>
+			<label for="description">Description <span class="muted">(optional)</span></label><textarea id="description" name="description" maxlength="1000" rows="2"></textarea>
+			<label for="file">File</label><input id="file" name="file" type="file" accept=".pdf,.png,.jpg,.jpeg,.txt,.doc,.docx,.xls,.xlsx" required>
+			<button class="button primary" type="submit">Upload</button>
+		</form>
+	</section>
+</main>
+</body>
+</html>

@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Add user · TrustVault</title>
+	<link rel="stylesheet" th:href="@{/css/app.css}">
+	<script th:src="@{/js/theme.js}" defer></script>
+</head>
+<body>
+<header class="topbar">
+	<a class="brand" th:href="@{/documents}"><span class="brand-mark small">TV</span> TrustVault</a>
+	<nav><a th:href="@{/documents}">Documents</a><a class="active" th:href="@{/admin/users}">Users</a><a th:href="@{/admin/activity}">Audit activity</a></nav>
+	<div class="user-menu"><span th:text="${username}">admin</span>
+		<a class="settings-link" th:href="@{/account/settings}" aria-label="Account settings" title="Account settings">
+			<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1-2.4 2.4-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6v.2h-3.4v-.2a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1-2.4-2.4.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.6-1H4v-3.4h.2a1.7 1.7 0 0 0 1.6-1 1.7 1.7 0 0 0-.3-1.9l-.1-.1 2.4-2.4.1.1a1.7 1.7 0 0 0 1.9.3 1.7 1.7 0 0 0 1-1.6V3h3.4v.2a1.7 1.7 0 0 0 1 1.6 1.7 1.7 0 0 0 1.9-.3l.1-.1 2.4 2.4-.1.1a1.7 1.7 0 0 0-.3 1.9 1.7 1.7 0 0 0 1.6 1h.2v3.4H21a1.7 1.7 0 0 0-1.6 1Z"></path></svg>
+		</a>
+		<form method="post" th:action="@{/logout}"><button class="link-button" type="submit">Sign out</button></form>
+	</div>
+</header>
+<main class="page">
+	<section class="page-heading">
+		<div><p class="eyebrow">ADMINISTRATION</p><h1>Add user</h1>
+			<p class="muted">Create a Viewer or Owner account. Admin accounts can only be provisioned by an operator.</p></div>
+		<a class="button secondary" th:href="@{/admin/users}">Back to users</a>
+	</section>
+	<section class="panel">
+		<form class="form-grid" method="post" th:action="@{/admin/users}" th:object="${newUser}">
+			<div class="alert error" th:if="${#fields.hasErrors('*')}">
+				<p th:each="error : ${#fields.errors('*')}" th:text="${error}"></p>
+			</div>
+			<label for="new-full-name">Full name</label>
+			<input id="new-full-name" th:field="*{fullName}" maxlength="120" required>
+			<label for="new-email">Email</label>
+			<input id="new-email" type="email" th:field="*{email}" maxlength="254" required>
+			<label for="new-username">Username</label>
+			<input id="new-username" th:field="*{username}" minlength="3" maxlength="80" required>
+			<label for="new-password">Initial password</label>
+			<input id="new-password" type="password" th:field="*{password}" minlength="12" maxlength="72"
+					autocomplete="new-password" required>
+			<p class="muted">Use at least 12 characters and no more than 72 UTF-8 bytes.</p>
+			<label for="new-role">Role</label>
+			<select id="new-role" th:field="*{role}" required>
+				<option th:each="role : ${roles}" th:value="${role}" th:text="${role}"></option>
+			</select>
+			<button class="button primary" type="submit">Create user</button>
+		</form>
+	</section>
+</main>
+</body>
+</html>

@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title th:text="${document.name + ' · TrustVault'}">Document · TrustVault</title>
+	<link rel="stylesheet" th:href="@{/css/app.css}">
+	<script th:src="@{/js/theme.js}" defer></script>
+	<script th:src="@{/js/grantee-select-all.js}" defer></script>
+</head>
+<body>
+<header class="topbar">
+	<a class="brand" th:href="@{/documents}"><span class="brand-mark small">TV</span> TrustVault</a>
+	<nav><a th:href="@{/documents}">Documents</a>
+		<a th:if="${role == 'VIEWER'}" th:href="@{/viewer/folders}">My folders</a>
+		<a th:if="${role == 'VIEWER'}" th:href="@{/viewer/documents}">My documents</a>
+		<a th:if="${role == 'OWNER'}" th:href="@{/owner/documents}">My uploads</a>
+		<a th:if="${role == 'OWNER'}" th:href="@{/owner/activity}">Audit activity</a></nav>
+	<div class="user-menu"><span th:text="${username}">user</span>
+		<a class="settings-link" th:href="@{/account/settings}" aria-label="Account settings" title="Account settings">
+			<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1-2.4 2.4-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6v.2h-3.4v-.2a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1-2.4-2.4.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.6-1H4v-3.4h.2a1.7 1.7 0 0 0 1.6-1 1.7 1.7 0 0 0-.3-1.9l-.1-.1 2.4-2.4.1.1a1.7 1.7 0 0 0 1.9.3 1.7 1.7 0 0 0 1-1.6V3h3.4v.2a1.7 1.7 0 0 0 1 1.6 1.7 1.7 0 0 0 1.9-.3l.1-.1 2.4 2.4-.1.1a1.7 1.7 0 0 0-.3 1.9 1.7 1.7 0 0 0 1.6 1h.2v3.4H21a1.7 1.7 0 0 0-1.6 1Z"></path></svg>
+		</a>
+		<form method="post" th:action="@{/logout}"><button class="link-button" type="submit">Sign out</button></form>
+	</div>
+</header>
+<main class="page narrow">
+	<a class="back-link" th:href="@{${backLink}}">← Back</a>
+	<div class="alert success" th:if="${notice}" th:text="${notice}"></div>
+	<section class="panel document-overview">
+		<div class="document-icon">▤</div>
+		<div class="document-title"><p class="eyebrow" th:text="${document.category}">CATEGORY</p><h1 th:text="${document.name}">Document</h1>
+			<p class="muted">Owned by <strong th:text="${document.owner.username}">owner</strong></p></div>
+		<div class="document-actions">
+			<a class="button secondary" th:href="@{/documents/{id}/open(id=${document.id})}" target="_blank" rel="noopener">Open document</a>
+			<a class="button primary" th:href="@{/documents/{id}/download(id=${document.id})}">Download</a>
+			<a class="button secondary" th:if="${canEdit and !isOwner}" th:href="@{/documents/{id}/edit(id=${document.id})} + '#upload-edited'">Upload edited file</a>
+			<form th:if="${canDelete}" method="post" th:action="@{/documents/{id}/delete(id=${document.id})}"
+					onsubmit="return confirm('Delete this document permanently?')">
+				<button class="button danger-outline" type="submit">Delete</button>
+			</form>
+		</div>
+		<dl class="metadata">
+			<div><dt>Uploaded</dt><dd th:text="${document.uploadedAt}">time</dd></div>
+			<div><dt>Size</dt><dd th:text="${#numbers.formatDecimal(document.size / 1024.0, 1, 1) + ' KB'}">size</dd></div>
+			<div><dt>File type</dt><dd th:text="${document.contentType}">type</dd></div>
+			<div><dt>Description</dt><dd th:text="${document.description == null ? 'No description' : document.description}">description</dd></div>
+		</dl>
+	</section>
+	<section class="panel" id="edit-document" th:if="${canEdit and !isOwner}">
+		<div class="panel-heading"><div><h2>Edit document details</h2><p class="muted">Editors can change metadata but cannot manage access.</p></div></div>
+		<form class="form-grid" method="post" th:action="@{/documents/{id}/edit(id=${document.id})}">
+			<div><label for="edit-name">Name</label><input id="edit-name" name="name" maxlength="180" required th:value="${document.name}"></div>
+			<div><label for="edit-category">Category</label><input id="edit-category" name="category" maxlength="80" required th:value="${document.category}"></div>
+			<div class="wide"><label for="edit-description">Description</label><textarea id="edit-description" name="description" maxlength="1000" rows="3" th:text="${document.description}"></textarea></div>
+			<div><button class="button primary" type="submit">Save changes</button></div>
+		</form>
+	</section>
+	<section class="panel" id="manage-access" th:if="${isOwner}">
+		<div class="panel-heading"><div><h2>People with access</h2><p class="muted">Change a person's access level and save, or revoke it. Changes apply on their next request.</p></div></div>
+		<div class="empty-inline" th:if="${grants.isEmpty()}">No one else has access to this document.</div>
+		<div class="grant-list" th:if="${!grants.isEmpty()}">
+			<div class="grant-row" th:each="grant : ${grants}">
+				<div><strong th:text="${grant.grantee.username}">viewer</strong></div>
+				<div class="document-actions">
+					<form class="document-actions" method="post" th:action="@{/documents/{id}/grants(id=${document.id})}">
+						<input type="hidden" name="username" th:value="${grant.grantee.username}">
+						<select name="permission" aria-label="Access level">
+							<option value="READ" th:selected="${grant.accessLevel.name() == 'READ'}">Read only</option>
+							<option value="EDIT" th:selected="${grant.accessLevel.name() == 'EDIT'}">Edit</option>
+							<option value="DELETE" th:selected="${grant.accessLevel.name() == 'DELETE'}">Edit and delete</option>
+						</select>
+						<button class="button primary small-button" type="submit">Save</button>
+					</form>
+					<form method="post" th:action="@{/documents/{id}/grants/revoke(id=${document.id})}">
+						<input type="hidden" name="username" th:value="${grant.grantee.username}">
+						<button class="button danger-outline small-button" type="submit">Revoke</button>
+					</form>
+				</div>
+			</div>
+		</div>
+	</section>
+	<section class="panel" id="grant-access" th:if="${isOwner}">
+		<div class="panel-heading"><div><h2>Grant access</h2><p class="muted">Choose people and the access level they should have.</p></div></div>
+		<form class="grant-form" method="post" th:action="@{/documents/{id}/grants/bulk(id=${document.id})}">
+			<fieldset class="grantee-picker">
+				<legend>Grant access to people</legend>
+				<input id="grantee-search" type="search" placeholder="Search people by name, username, email, or role"
+						autocomplete="off" aria-label="Search people to grant access">
+				<div class="grantee-list" id="grantee-list">
+					<label class="grantee-option select-all-option">
+						<input id="select-all-grantees" type="checkbox" th:disabled="${grantTargets.isEmpty()}">
+						<span>Select all matching people</span>
+					</label>
+					<label class="grantee-option" th:each="target : ${grantTargets}"
+							th:attr="data-search=${#strings.toLowerCase((target.fullName ?: '') + ' ' + target.username + ' ' + (target.email ?: '') + ' ' + target.role)}">
+						<input type="checkbox" name="grantees" th:value="${target.username}">
+						<span th:text="${(target.fullName != null and !#strings.isEmpty(target.fullName.trim()) ? target.fullName + ' (' + target.username + ')' : target.username) + ' · ' + target.role}">Name</span>
+					</label>
+					<p class="muted grantee-empty" id="grantee-no-match" hidden>No matching users.</p>
+					<p class="muted grantee-empty" th:if="${grantTargets.isEmpty()}">No other active users available.</p>
+				</div>
+				<p class="muted grantee-count" id="grantee-count" aria-live="polite">0 selected</p>
+			</fieldset>
+			<div><label for="permission">Access level for selected people</label><select id="permission" name="permission"><option value="READ">Read only</option><option value="EDIT">Edit</option><option value="DELETE">Edit and delete</option></select></div>
+			<button class="button primary align-end" type="submit" th:disabled="${grantTargets.isEmpty()}">Grant access</button>
+		</form>
+	</section>
+	<footer>Document access and permission changes are recorded in the audit trail.</footer>
+</main>
+</body>
+</html>

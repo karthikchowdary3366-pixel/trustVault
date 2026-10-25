@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Documents · TrustVault</title>
+	<link rel="stylesheet" th:href="@{/css/app.css}">
+	<script th:src="@{/js/theme.js}" defer></script>
+</head>
+<body>
+<header class="topbar">
+	<a class="brand" th:href="@{/documents}"><span class="brand-mark small">TV</span> TrustVault</a>
+	<nav>
+		<a class="active" th:href="@{/documents}">Documents</a>
+		<a th:if="${role == 'OWNER'}" th:href="@{/owner/documents}">My uploads</a>
+		<a th:if="${role == 'OWNER'}" th:href="@{/owner/activity}">Audit activity</a>
+		<a th:if="${role == 'VIEWER'}" th:href="@{/viewer/folders}">My folders</a>
+		<a th:if="${role == 'VIEWER'}" th:href="@{/viewer/documents}">My documents</a>
+		<a th:if="${role == 'ADMIN'}" th:href="@{/admin/users}">Users</a>
+		<a th:if="${role == 'ADMIN'}" th:href="@{/admin/activity}">Audit activity</a>
+	</nav>
+	<div class="user-menu"><span th:text="${username}">user</span><span class="role-pill" th:text="${role}">ROLE</span>
+		<a class="settings-link" th:href="@{/account/settings}" aria-label="Account settings" title="Account settings">
+			<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1-2.4 2.4-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6v.2h-3.4v-.2a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1-2.4-2.4.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.6-1H4v-3.4h.2a1.7 1.7 0 0 0 1.6-1 1.7 1.7 0 0 0-.3-1.9l-.1-.1 2.4-2.4.1.1a1.7 1.7 0 0 0 1.9.3 1.7 1.7 0 0 0 1-1.6V3h3.4v.2a1.7 1.7 0 0 0 1 1.6 1.7 1.7 0 0 0 1.9-.3l.1-.1 2.4 2.4-.1.1a1.7 1.7 0 0 0-.3 1.9 1.7 1.7 0 0 0 1.6 1h.2v3.4H21a1.7 1.7 0 0 0-1.6 1Z"></path></svg>
+		</a>
+		<form method="post" th:action="@{/logout}"><button class="link-button" type="submit">Sign out</button></form>
+	</div>
+</header>
+<main class="page">
+	<section class="page-heading">
+		<div><p class="eyebrow">YOUR SECURE WORKSPACE</p><h1>Documents</h1>
+			<p class="muted">Opening and using a document requires current access.</p></div>
+		<div class="owner-actions" th:if="${role == 'OWNER'}">
+			<a class="button primary" th:href="@{/documents/upload}">Upload a document</a>
+			<a class="button primary" th:href="@{/folders/create}">Create a folder</a>
+		</div>
+	</section>
+	<div class="alert success" th:if="${notice}" th:text="${notice}"></div>
+	<div class="alert info" th:if="${passwordChangeRequired}">
+		This account was created by an administrator. For your security, <a th:href="@{/account/settings}">change your initial password</a>.
+	</div>
+	<section class="panel">
+			<div class="panel-heading"><div><h2>Search documents</h2><p class="muted">Search by name, owner, category, or upload date.</p></div></div>
+			<form class="search-grid" method="post" th:action="@{/documents/search}">
+				<div>
+					<label for="filter-name">Name</label>
+					<input id="filter-name" name="name" th:value="${name}" placeholder="Search names">
+				</div>
+				<div><label for="filter-owner">Owner</label><input id="filter-owner" name="owner" th:value="${owner}" placeholder="Username"></div>
+				<div><label for="filter-category">Category</label><input id="filter-category" name="category" th:value="${category}" placeholder="e.g. Contracts"></div>
+				<div><label for="from">Uploaded date</label><input id="from" name="from" type="date" th:value="${from}"></div>
+				<div class="filter-actions"><button class="button primary" type="submit">Search</button><a class="button secondary" th:href="@{/documents(clear=true)}">Clear</a></div>
+			</form>
+	</section>
+	<section class="panel documents-panel" th:if="${documents != null}">
+			<div class="panel-heading"><div><h2>Search results</h2><p class="muted" th:text="${documents.size() + ' documents'}">0 documents</p></div></div>
+			<div class="empty-state" th:if="${documents.isEmpty()}">
+				<div class="empty-icon">◇</div><h3>No documents found</h3>
+				<p class="muted">Try different filters, or ask an owner to grant you access.</p>
+			</div>
+			<div class="table-wrap" th:if="${!documents.isEmpty()}">
+				<table><thead><tr><th>Document</th><th>Category</th><th>Owner</th><th>Uploaded</th><th></th></tr></thead>
+					<tbody><tr th:each="doc : ${documents}">
+						<td><a class="document-link" th:href="@{/documents/{id}(id=${doc.document.id})}" th:text="${doc.document.name}">Document</a></td>
+						<td><span class="category-pill" th:text="${doc.document.category}">Category</span></td>
+						<td th:text="${doc.document.owner.username}">owner</td>
+						<td class="muted" th:text="${doc.document.uploadedAt}">date</td>
+						<td><div class="document-actions"><a class="button small-button secondary" th:href="@{/documents/{id}/open(id=${doc.document.id})}" target="_blank" rel="noopener">Open</a>
+							<a class="button small-button secondary" th:href="@{/documents/{id}/download(id=${doc.document.id})}">Download</a>
+							<a class="button small-button secondary" th:if="${role != 'OWNER'}" th:href="@{/documents/{id}/edit(id=${doc.document.id})}">Edit</a>
+							<a class="button small-button secondary" th:if="${role != 'OWNER'}" th:href="@{/documents/{id}/edit(id=${doc.document.id})} + '#upload-edited'">Upload</a>
+							<form th:if="${role != 'OWNER'}" method="post" th:action="@{/documents/{id}/delete(id=${doc.document.id})}"
+									onsubmit="return confirm('Delete this document permanently?')">
+								<button class="button small-button danger-outline" type="submit">Delete</button>
+							</form></div></td>
+					</tr></tbody>
+				</table>
+			</div>
+	</section>
+	<footer>Access is checked by the server on every document request. Shared links are not issued.</footer>
+</main>
+</body>
+</html>

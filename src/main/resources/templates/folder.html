@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title th:text="${folder.name + ' · TrustVault'}">Folder · TrustVault</title>
+	<link rel="stylesheet" th:href="@{/css/app.css}">
+	<script th:src="@{/js/theme.js}" defer></script>
+</head>
+<body>
+<header class="topbar">
+	<a class="brand" th:href="@{/documents}"><span class="brand-mark small">TV</span> TrustVault</a>
+	<nav><a th:href="@{/documents}">Documents</a>
+		<a th:if="${role == 'VIEWER'}" th:href="@{/viewer/folders}">My folders</a>
+		<a th:if="${role == 'VIEWER'}" th:href="@{/viewer/documents}">My documents</a>
+		<a th:if="${role == 'OWNER'}" th:href="@{/owner/documents}">My uploads</a>
+		<a th:if="${role == 'OWNER'}" th:href="@{/owner/activity}">Audit activity</a></nav>
+	<div class="user-menu"><span th:text="${username}">user</span>
+		<a class="settings-link" th:href="@{/account/settings}" aria-label="Account settings" title="Account settings">
+			<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1-2.4 2.4-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6v.2h-3.4v-.2a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1-2.4-2.4.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.6-1H4v-3.4h.2a1.7 1.7 0 0 0 1.6-1 1.7 1.7 0 0 0-.3-1.9l-.1-.1 2.4-2.4.1.1a1.7 1.7 0 0 0 1.9.3 1.7 1.7 0 0 0 1-1.6V3h3.4v.2a1.7 1.7 0 0 0 1 1.6 1.7 1.7 0 0 0 1.9-.3l.1-.1 2.4 2.4-.1.1a1.7 1.7 0 0 0-.3 1.9 1.7 1.7 0 0 0 1.6 1h.2v3.4H21a1.7 1.7 0 0 0-1.6 1Z"></path></svg>
+		</a>
+		<form method="post" th:action="@{/logout}"><button class="link-button" type="submit">Sign out</button></form>
+	</div>
+</header>
+<main class="page narrow">
+	<a class="back-link" th:href="@{/folders}">← All folders</a>
+	<div class="alert success" th:if="${notice}" th:text="${notice}"></div>
+	<section class="panel document-overview">
+		<div class="document-icon">📁</div>
+		<div class="document-title">
+			<h1 th:text="${folder.name}">Folder</h1>
+			<p class="muted">Owned by <strong th:text="${folder.owner.username}">owner</strong></p>
+		</div>
+		<dl class="metadata">
+			<div><dt>Created</dt><dd th:text="${folder.createdAt}">time</dd></div>
+			<div th:if="${folder.description != null}"><dt>Description</dt><dd th:text="${folder.description}">description</dd></div>
+		</dl>
+	</section>
+
+	<section class="panel documents-panel">
+		<div class="panel-heading">
+			<div><h2>Documents in this folder</h2><p class="muted" th:text="${documents.size() + ' documents'}">0 documents</p></div>
+			<div class="document-actions">
+				<a th:if="${isOwner}" class="button primary small-button"
+						th:href="@{/documents/upload(folderId=${folder.id})}">Upload document</a>
+				<form th:if="${isOwner and !documents.isEmpty()}" method="post"
+					th:action="@{/folders/{id}/documents/delete-all(id=${folder.id})}"
+					onsubmit="return confirm('Delete all documents in this folder permanently? This cannot be undone.')">
+				<button class="button danger-outline small-button" type="submit">Delete all</button>
+				</form>
+			</div>
+		</div>
+		<div class="empty-state" th:if="${documents.isEmpty()}">
+			<div class="empty-icon">◇</div><h3>No documents in this folder</h3>
+			<p class="muted" th:if="${isOwner}">Upload documents and assign them to this folder.</p>
+			<p class="muted" th:if="${!isOwner}">No documents have been shared with you from this folder yet.</p>
+		</div>
+		<div class="table-wrap" th:if="${!documents.isEmpty()}">
+			<table>
+				<thead><tr><th>Document</th><th>Category</th><th>Uploaded</th><th></th></tr></thead>
+				<tbody>
+					<tr th:each="doc : ${documents}">
+						<td>
+							<span th:if="${!doc.accessible()}" class="document-link muted" th:text="${doc.document().name}">Document</span>
+							<a th:if="${doc.accessible()}" class="document-link" th:href="@{/documents/{id}(id=${doc.document().id})}" th:text="${doc.document().name}">Document</a>
+						</td>
+						<td><span class="category-pill" th:text="${doc.document().category}">Category</span></td>
+						<td class="muted" th:text="${doc.document().uploadedAt}">date</td>
+						<td><div class="document-actions">
+							<a class="button small-button secondary" th:href="@{/documents/{id}/open(id=${doc.document().id})}" target="_blank" rel="noopener">Open</a>
+							<a class="button small-button secondary" th:href="@{/documents/{id}/download(id=${doc.document().id})}">Download</a>
+							<a class="button small-button secondary" th:if="${!isOwner}" th:href="@{/documents/{id}/edit(id=${doc.document().id})} + '#upload-edited'">Upload</a>
+							<a class="button small-button secondary delete-button" th:if="${!isOwner}"
+									th:href="@{/documents/{id}/edit(id=${doc.document().id})}" aria-label="Edit document" title="Edit document">
+								<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16v4zM13 7l4 4"></path></svg>
+							</a>
+							<form method="post"
+									th:action="@{/documents/{id}/delete(id=${doc.document().id})}"
+									onsubmit="return confirm('Delete this document permanently? This cannot be undone.')">
+								<button class="button small-button danger-outline delete-button" type="submit"
+										aria-label="Delete document" title="Delete document">
+									<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M10 11v6m4-6v6M5 7l1 14h12l1-14M9 7V4h6v3"></path></svg>
+								</button>
+							</form>
+						</div></td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+	</section>
+
+	<section class="panel" th:if="${isOwner}">
+		<div class="panel-heading"><div><h2>People with access</h2><p class="muted">Viewers can see all documents in this folder but can only access documents they've been specifically granted.</p></div></div>
+		<div class="empty-inline" th:if="${grants.isEmpty()}">No one else has access to this folder.</div>
+		<div class="grant-list" th:if="${!grants.isEmpty()}">
+			<div class="grant-row" th:each="grant : ${grants}">
+				<div><strong th:text="${grant.grantee.username}">viewer</strong></div>
+				<form method="post" th:action="@{/folders/{id}/grants/revoke(id=${folder.id})}">
+					<input type="hidden" name="username" th:value="${grant.grantee.username}">
+					<button class="button danger-outline small-button" type="submit">Revoke access</button>
+				</form>
+			</div>
+		</div>
+		<form class="grant-form" method="post" th:action="@{/folders/{id}/grants(id=${folder.id})}">
+			<div><label for="grant-user">Grant to</label><select id="grant-user" name="username" required>
+				<option value="" disabled selected>Select a person</option>
+				<option th:each="target : ${grantTargets}" th:value="${target.username}" th:text="${target.fullName + ' (' + target.username + ') · ' + target.role}"></option>
+			</select></div>
+			<button class="button primary align-end" type="submit">Grant access</button>
+		</form>
+	</section>
+
+	<footer>Folder access and permission changes are recorded in the audit trail.</footer>
+</main>
+</body>
+</html>

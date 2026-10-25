@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Sign in · TrustVault</title>
+	<link rel="stylesheet" th:href="@{/css/app.css}">
+	<script th:src="@{/js/theme.js}" defer></script>
+</head>
+<body class="login-page login-screen">
+<main class="login-shell">
+	<section class="login-card login-card-horizontal" aria-labelledby="login-title">
+		<div class="login-form-panel">
+			<div class="login-form-content">
+				<div class="login-intro">
+					<p class="eyebrow">PRIVATE DOCUMENT WORKSPACE</p>
+					<h1 id="login-title">Welcome to TrustVault</h1>
+					<p class="muted">Sign in to securely access the documents shared with you.</p>
+				</div>
+				<div class="alert error" th:if="${param.passwordError}">Invalid password. <a th:href="@{/password-reset}">Reset it using email verification</a>.</div>
+				<div class="alert error" th:if="${param.disabled}">This account is deactivated. Contact an administrator for help.</div>
+				<div class="alert success" th:if="${param.usernameChanged}">Your username was changed. Sign in with your new username.</div>
+				<div class="alert error" th:if="${param.error}">You don't have an account to login. Please create a new account.</div>
+				<div class="alert success" th:if="${param.logout}">You have signed out.</div>
+				<div class="alert success" th:if="${param.registered}">Your account is ready. Sign in to continue.</div>
+				<div class="alert success" th:if="${param.reset}">Your password has been reset. Sign in with your new password.</div>
+				<form class="login-form" method="post" th:action="@{/login}">
+					<label for="username">Username</label>
+					<input id="username" name="username" autocomplete="username" placeholder="Enter your username" required autofocus>
+					<label for="password">Password</label>
+					<div class="password-input">
+						<input id="password" name="password" type="password" autocomplete="current-password" placeholder="Enter your password" required>
+						<button class="password-visibility" type="button" aria-label="Show password"
+								aria-controls="password" aria-pressed="false">
+							<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+								<path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z"></path>
+								<circle cx="12" cy="12" r="3"></circle>
+								<path class="eye-slash" d="m4 4 16 16"></path>
+							</svg>
+						</button>
+					</div>
+					<button class="button primary full" type="submit">Sign in securely <span aria-hidden="true">→</span></button>
+				</form>
+				<div class="login-links">
+					<a th:href="@{/password-reset}">Forgot your password?</a>
+					<p>No login credentials yet? <a th:href="@{/register}">Create a new account</a>.</p>
+				</div>
+				<p class="login-privacy"><span aria-hidden="true">▣</span> Your documents stay private and access is checked every time.</p>
+			</div>
+		</div>
+		<aside class="login-card-header" aria-label="About TrustVault">
+			<a class="story-brand" th:href="@{/login}" aria-label="TrustVault home">
+				<span class="brand-mark story-mark">TV</span><span>TrustVault</span>
+			</a>
+			<p class="story-eyebrow">SECURE SHARING. PROVABLE ACCESS.</p>
+			<h2>Your documents,<br><span>always in trusted hands.</span></h2>
+			<p>Access is checked every time. Important activity leaves a clear audit trail.</p>
+			<div class="login-trust-points" aria-label="TrustVault safeguards">
+				<span><b aria-hidden="true">✓</b> Verified access</span>
+				<span><b aria-hidden="true">•</b> Activity recorded</span>
+				<span><b aria-hidden="true">•</b> Private by design</span>
+			</div>
+			<div class="login-marquee" aria-label="TrustVault features">
+				<div class="login-marquee-track">
+					<span>Secure document sharing</span><span aria-hidden="true">◆</span>
+					<span>Access checked every time</span><span aria-hidden="true">◆</span>
+					<span>Auditable activity</span><span aria-hidden="true">◆</span>
+					<span>Secure document sharing</span><span aria-hidden="true">◆</span>
+					<span>Access checked every time</span><span aria-hidden="true">◆</span>
+					<span>Auditable activity</span><span aria-hidden="true">◆</span>
+				</div>
+			</div>
+		</aside>
+	</section>
+</main>
+<script>
+	document.querySelectorAll(".password-visibility").forEach((button) => {
+		button.addEventListener("click", () => {
+			const password = document.getElementById(button.getAttribute("aria-controls"));
+			const isVisible = password.type === "text";
+			password.type = isVisible ? "password" : "text";
+			button.setAttribute("aria-label", isVisible ? "Show password" : "Hide password");
+			button.setAttribute("aria-pressed", String(!isVisible));
+		});
+	});
+</script>
+</body>
+</html>

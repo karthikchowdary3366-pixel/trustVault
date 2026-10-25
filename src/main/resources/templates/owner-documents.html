@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>My uploads · TrustVault</title>
+	<link rel="stylesheet" th:href="@{/css/app.css}">
+	<script th:src="@{/js/theme.js}" defer></script>
+</head>
+<body>
+<header class="topbar">
+	<a class="brand" th:href="@{/documents}"><span class="brand-mark small">TV</span> TrustVault</a>
+	<nav>
+		<a th:href="@{/documents}">Documents</a>
+		<a class="active" th:href="@{/owner/documents}">My uploads</a>
+		<a th:href="@{/owner/activity}">Audit activity</a>
+	</nav>
+	<div class="user-menu"><span th:text="${username}">owner</span>
+		<a class="settings-link" th:href="@{/account/settings}" aria-label="Account settings" title="Account settings">
+			<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1-2.4 2.4-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6v.2h-3.4v-.2a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1-2.4-2.4.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.6-1H4v-3.4h.2a1.7 1.7 0 0 0 1.6-1 1.7 1.7 0 0 0-.3-1.9l-.1-.1 2.4-2.4.1.1a1.7 1.7 0 0 0 1.9.3 1.7 1.7 0 0 0 1-1.6V3h3.4v.2a1.7 1.7 0 0 0 1 1.6 1.7 1.7 0 0 0 1.9-.3l.1-.1 2.4 2.4-.1.1a1.7 1.7 0 0 0-.3 1.9 1.7 1.7 0 0 0 1.6 1h.2v3.4H21a1.7 1.7 0 0 0-1.6 1Z"></path></svg>
+		</a>
+		<form method="post" th:action="@{/logout}"><button class="link-button" type="submit">Sign out</button></form>
+	</div>
+</header>
+<main class="page">
+	<section class="page-heading">
+		<div><p class="eyebrow">OWNER WORKSPACE</p><h1>My uploads</h1>
+			<p class="muted">Documents uploaded and owned by your account.</p></div>
+	</section>
+	<section class="panel documents-panel">
+		<div class="panel-heading"><div><h2>Uploaded documents</h2>
+			<p class="muted" th:text="${documents.size() + ' documents'}">0 documents</p></div></div>
+		<div class="empty-state" th:if="${documents.isEmpty()}">
+			<div class="empty-icon">◇</div><h3>No uploads yet</h3>
+			<p class="muted">Documents you upload will appear here.</p>
+			<a class="button primary" th:href="@{/documents/upload}">Upload a document</a>
+		</div>
+		<div class="table-wrap" th:if="${!documents.isEmpty()}">
+			<table><thead><tr><th>Document</th><th>Category</th><th>Uploaded</th><th>Size</th><th></th></tr></thead>
+				<tbody><tr th:each="doc : ${documents}">
+					<td><a class="document-link" th:href="@{/documents/{id}(id=${doc.id})}" th:text="${doc.name}">Document</a></td>
+					<td><span class="category-pill" th:text="${doc.category}">Category</span></td>
+					<td class="muted" th:text="${doc.uploadedAt}">date</td>
+					<td class="muted" th:text="${#numbers.formatDecimal(doc.size / 1024.0, 1, 1) + ' KB'}">size</td>
+					<td><div class="document-actions">
+						<a class="button small-button secondary" th:href="@{/documents/{id}/open(id=${doc.id})}" target="_blank" rel="noopener">Open</a>
+						<a class="button small-button secondary" th:href="@{/documents/{id}/download(id=${doc.id})}">Download</a>
+						<a class="button small-button secondary delete-button" th:href="@{|/documents/${doc.id}#manage-access|}"
+								aria-label="Edit document" title="Edit document">
+							<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16v4zM13 7l4 4"></path></svg>
+						</a>
+						<form method="post" th:action="@{/documents/{id}/delete(id=${doc.id})}"
+								onsubmit="return confirm('Delete this document permanently?')">
+							<button class="button small-button danger-outline delete-button" type="submit"
+									aria-label="Delete document" title="Delete document">
+								<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M10 11v6m4-6v6M5 7l1 14h12l1-14M9 7V4h6v3"></path></svg>
+							</button>
+						</form>
+					</div></td>
+				</tr></tbody>
+			</table>
+		</div>
+	</section>
+</main>
+</body>
+</html>

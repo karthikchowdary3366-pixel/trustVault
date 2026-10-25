@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Privacy Notice · TrustVault</title>
+	<link rel="stylesheet" th:href="@{/css/app.css}">
+	<script th:src="@{/js/theme.js}" defer></script>
+</head>
+<body>
+<main class="page narrow">
+	<a class="back-link" th:href="@{/register}">← Back to account creation</a>
+	<section class="panel">
+		<p class="eyebrow">ACCOUNT AND DOCUMENT DATA</p>
+		<h1>TrustVault Privacy Notice</h1>
+		<p>TrustVault stores your name, email address, username, password hash, role, and the time and version of the Terms and Conditions you accepted. Email addresses are used for account verification and, when configured, password recovery.</p>
+		<p>Uploaded documents are stored privately. TrustVault also records security audit events, including document access, permission changes, and refused access attempts. Administrators may review activity for security and operations.</p>
+		<p>Verification codes are time-limited and stored as keyed hashes. Passwords are stored as password hashes, not in plain text. Your organization’s administrator controls the deployment, retention, and deletion of service data.</p>
+		<p>Contact your TrustVault administrator to ask about or request changes to your account information.</p>
+	</section>
+</main>
+</body>
+</html>

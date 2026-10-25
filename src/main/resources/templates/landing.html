@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Welcome to TrustVault</title>
+	<link rel="stylesheet" th:href="@{/css/app.css}">
+	<script th:src="@{/js/theme.js}" defer></script>
+</head>
+<body class="landing-page">
+<main class="landing-shell">
+	<header class="landing-nav">
+		<a class="brand" th:href="@{/}"><span class="brand-mark small">TV</span> TrustVault</a>
+		<span class="landing-signin">Secure document sharing</span>
+	</header>
+	<section class="landing-hero">
+		<div class="landing-copy">
+			<p class="eyebrow">PRIVATE DOCUMENT WORKSPACE</p>
+			<h1>Welcome to <span>TrustVault</span></h1>
+			<p class="landing-description">Share important documents with confidence. Access is carefully controlled, and activity is recorded for accountability.</p>
+			<a class="button primary landing-cta" th:href="@{/login}">Get started <span aria-hidden="true">→</span></a>
+			<p class="landing-note">Secure access. Private documents. Clear accountability.</p>
+		</div>
+		<div class="landing-visual" aria-hidden="true">
+			<div class="landing-orbit landing-orbit-one"></div>
+			<div class="landing-orbit landing-orbit-two"></div>
+			<div class="landing-document">
+				<div class="landing-document-icon">TV</div>
+				<div class="landing-document-lines"><i></i><i></i><i></i></div>
+				<div class="landing-shield">✓</div>
+			</div>
+			<div class="landing-visual-caption">Protected by verified access</div>
+		</div>
+	</section>
+	<section class="landing-features" aria-label="TrustVault features">
+		<article tabindex="0"><span class="landing-feature-icon">◇</span><h2>Private by design</h2><p>Search results show document metadata; viewing or downloading contents requires explicit access.</p></article>
+		<article tabindex="0"><span class="landing-feature-icon">✓</span><h2>Access checked</h2><p>Permissions are checked by the server for every document request.</p></article>
+		<article tabindex="0"><span class="landing-feature-icon">↗</span><h2>Accountable sharing</h2><p>Important document and permission activity is recorded in an audit trail.</p></article>
+	</section>
+	<footer class="landing-footer">TrustVault · Secure sharing. Provable access.</footer>
+</main>
+</body>
+</html>

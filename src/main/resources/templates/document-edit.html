@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title th:text="${'Edit ' + document.name + ' · TrustVault'}">Edit · TrustVault</title>
+	<link rel="stylesheet" th:href="@{/css/app.css}">
+	<script th:src="@{/js/theme.js}" defer></script>
+</head>
+<body>
+<header class="topbar">
+	<a class="brand" th:href="@{/documents}"><span class="brand-mark small">TV</span> TrustVault</a>
+	<nav><a th:href="@{/documents}">Documents</a>
+		<a th:if="${role == 'VIEWER'}" th:href="@{/viewer/folders}">My folders</a>
+		<a th:if="${role == 'VIEWER'}" th:href="@{/viewer/documents}">My documents</a>
+		<a th:if="${role == 'OWNER'}" th:href="@{/owner/documents}">My uploads</a></nav>
+	<div class="user-menu"><span th:text="${username}">user</span>
+		<form method="post" th:action="@{/logout}"><button class="link-button" type="submit">Sign out</button></form>
+	</div>
+</header>
+<main class="page narrow">
+	<a class="back-link" th:href="@{/documents/{id}(id=${document.id})}">← Back to document</a>
+	<section class="panel">
+		<div class="panel-heading"><div><h2 th:text="${'Edit ' + document.name}">Edit document</h2>
+			<p class="muted">Update the details, or download the file, edit it, and upload the edited version below.</p></div></div>
+		<form class="form-grid" method="post" th:action="@{/documents/{id}/edit(id=${document.id})}">
+			<div><label for="edit-name">Name</label><input id="edit-name" name="name" maxlength="180" required th:value="${document.name}"></div>
+			<div><label for="edit-category">Category</label><input id="edit-category" name="category" maxlength="80" required th:value="${document.category}"></div>
+			<div class="wide"><label for="edit-description">Description</label><textarea id="edit-description" name="description" maxlength="1000" rows="2" th:text="${document.description}"></textarea></div>
+			<div><button class="button primary" type="submit">Save changes</button></div>
+		</form>
+	</section>
+	<section class="panel" id="upload-edited">
+		<div class="panel-heading"><div><h2>Upload edited file</h2>
+			<p class="muted">Download the file, edit it in your own editor, then upload it here. It replaces the current version for everyone with access. The file must be the same type as the original.</p></div></div>
+		<div class="document-actions">
+			<a class="button secondary" th:href="@{/documents/{id}/download(id=${document.id})}">Download to edit</a>
+		</div>
+		<form class="form-grid" method="post" enctype="multipart/form-data" th:action="@{/documents/{id}/upload-edit(id=${document.id})}">
+			<div class="wide"><label for="edited-file">Edited file</label>
+				<input id="edited-file" name="file" type="file" accept=".pdf,.png,.jpg,.jpeg,.txt,.doc,.docx,.xls,.xlsx" required></div>
+			<div><button class="button primary" type="submit">Upload edited file</button></div>
+		</form>
+	</section>
+</main>
+</body>
+</html>

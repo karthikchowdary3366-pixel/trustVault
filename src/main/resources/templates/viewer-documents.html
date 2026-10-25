@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>My documents · TrustVault</title>
+	<link rel="stylesheet" th:href="@{/css/app.css}">
+	<script th:src="@{/js/theme.js}" defer></script>
+</head>
+<body>
+<header class="topbar">
+	<a class="brand" th:href="@{/documents}"><span class="brand-mark small">TV</span> TrustVault</a>
+	<nav>
+		<a th:href="@{/documents}">Documents</a>
+		<a th:href="@{/viewer/folders}">My folders</a>
+		<a class="active" th:href="@{/viewer/documents}">My documents</a>
+	</nav>
+	<div class="user-menu"><span th:text="${username}">viewer</span>
+		<a class="settings-link" th:href="@{/account/settings}" aria-label="Account settings" title="Account settings">
+			<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1-2.4 2.4-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6v.2h-3.4v-.2a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1-2.4-2.4.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.6-1H4v-3.4h.2a1.7 1.7 0 0 0 1.6-1 1.7 1.7 0 0 0-.3-1.9l-.1-.1 2.4-2.4.1.1a1.7 1.7 0 0 0 1.9.3 1.7 1.7 0 0 0 1-1.6V3h3.4v.2a1.7 1.7 0 0 0 1 1.6 1.7 1.7 0 0 0 1.9-.3l.1-.1 2.4 2.4-.1.1a1.7 1.7 0 0 0-.3 1.9 1.7 1.7 0 0 0 1.6 1h.2v3.4H21a1.7 1.7 0 0 0-1.6 1Z"></path></svg>
+		</a>
+		<form method="post" th:action="@{/logout}"><button class="link-button" type="submit">Sign out</button></form>
+	</div>
+</header>
+<main class="page">
+	<section class="page-heading">
+		<div><p class="eyebrow">VIEWER WORKSPACE</p><h1>My documents</h1>
+			<p class="muted">Documents in folders shared with you are listed here. Only individually granted documents can be opened.</p></div>
+	</section>
+	<section class="panel documents-panel">
+		<div class="panel-heading"><div><h2>Documents shared with me</h2>
+			<p class="muted" th:text="${documents.size() + ' documents'}">0 documents</p></div></div>
+		<form method="get" th:action="@{/viewer/documents}" class="search-grid">
+			<div><label for="folder-filter">Folder</label>
+				<select id="folder-filter" name="folder">
+					<option value="">All folders</option>
+					<option th:each="f : ${folderNames}" th:value="${f}" th:text="${f}"
+							th:selected="${f == selectedFolder}">Folder</option>
+				</select></div>
+			<div class="filter-actions"><button class="button primary" type="submit">Filter</button>
+				<a class="button secondary" th:href="@{/viewer/documents}">Clear</a></div>
+		</form>
+		<div class="empty-state" th:if="${documents.isEmpty()}">
+			<div class="empty-icon">◇</div><h3>No documents shared with you</h3>
+			<p class="muted">Documents shared with you directly or through a folder will appear here.</p>
+		</div>
+		<div class="table-wrap" th:if="${!documents.isEmpty()}">
+			<table><thead><tr><th>Document</th><th>Folder</th><th>Category</th><th>Owner</th><th>Uploaded</th><th></th></tr></thead>
+				<tbody><tr th:each="doc : ${documents}">
+					<td><span class="document-link" th:text="${doc.document().name}">Document</span></td>
+					<td th:text="${doc.document().folder != null ? doc.document().folder.name : '—'}">folder</td>
+					<td><span class="category-pill" th:text="${doc.document().category}">Category</span></td>
+					<td th:text="${doc.document().owner.username}">owner</td>
+					<td class="muted" th:text="${doc.document().uploadedAt}">date</td>
+					<td>
+						<a class="button small-button secondary"
+								th:href="@{/documents/{id}/open(id=${doc.document().id})}"
+								target="_blank" rel="noopener">Open</a>
+						<a class="button small-button secondary"
+								th:href="@{/documents/{id}/download(id=${doc.document().id})}">Download</a>
+						<a class="button small-button secondary"
+								th:href="@{/documents/{id}/edit(id=${doc.document().id})}">Edit</a>
+						<a class="button small-button secondary"
+								th:href="@{/documents/{id}/edit(id=${doc.document().id})} + '#upload-edited'">Upload</a>
+						<form method="post" style="display:inline"
+								th:action="@{/documents/{id}/delete(id=${doc.document().id})}"
+								onsubmit="return confirm('Delete this document permanently?')">
+							<button class="button small-button danger-outline" type="submit">Delete</button>
+						</form>
+					</td>
+				</tr></tbody>
+			</table>
+		</div>
+	</section>
+</main>
+</body>
+</html>

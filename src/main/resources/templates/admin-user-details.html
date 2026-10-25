@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>User details · TrustVault</title>
+	<link rel="stylesheet" th:href="@{/css/app.css}">
+	<script th:src="@{/js/theme.js}" defer></script>
+</head>
+<body>
+<header class="topbar">
+	<a class="brand" th:href="@{/documents}"><span class="brand-mark small">TV</span> TrustVault</a>
+	<nav><a th:href="@{/documents}">Documents</a><a class="active" th:href="@{/admin/users}">Users</a><a th:href="@{/admin/activity}">Audit activity</a></nav>
+	<div class="user-menu"><span th:text="${username}">admin</span>
+		<a class="settings-link" th:href="@{/account/settings}" aria-label="Account settings" title="Account settings">
+			<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1-2.4 2.4-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6v.2h-3.4v-.2a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1-2.4-2.4.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.6-1H4v-3.4h.2a1.7 1.7 0 0 0 1.6-1 1.7 1.7 0 0 0-.3-1.9l-.1-.1 2.4-2.4.1.1a1.7 1.7 0 0 0 1.9.3 1.7 1.7 0 0 0 1-1.6V3h3.4v.2a1.7 1.7 0 0 0 1 1.6 1.7 1.7 0 0 0 1.9-.3l.1-.1 2.4 2.4-.1.1a1.7 1.7 0 0 0-.3 1.9 1.7 1.7 0 0 0 1.6 1h.2v3.4H21a1.7 1.7 0 0 0-1.6 1Z"></path></svg>
+		</a>
+		<form method="post" th:action="@{/logout}"><button class="link-button" type="submit">Sign out</button></form>
+	</div>
+</header>
+<main class="page">
+	<section class="page-heading">
+		<div><p class="eyebrow">ADMINISTRATION</p><h1>User details</h1>
+			<p class="muted" th:text="${account.username}">username</p></div>
+		<a class="button secondary" th:href="@{/admin/users}">Back to users</a>
+	</section>
+	<div class="alert success" th:if="${notice}" th:text="${notice}"></div>
+	<div class="alert error" th:if="${error}" th:text="${error}"></div>
+	<section class="panel">
+		<h2>Account information</h2>
+		<dl class="account-details">
+			<div><dt>Full name</dt><dd th:text="${account.fullName == null ? '—' : account.fullName}">Full name</dd></div>
+			<div><dt>Email</dt><dd th:text="${account.email == null ? '—' : account.email}">Email</dd></div>
+			<div><dt>Username</dt><dd th:text="${account.username}">username</dd></div>
+			<div><dt>Role</dt><dd><span class="role-pill" th:text="${account.role}">VIEWER</span></dd></div>
+			<div><dt>Account status</dt><dd th:text="${account.active ? 'Active' : 'Deactivated'}">Active</dd></div>
+			<div><dt>Email status</dt><dd th:text="${account.emailVerified ? 'Verified' : 'Not verified'}">Not verified</dd></div>
+			<div><dt>Initial password change required</dt><dd th:text="${account.passwordChangeRequired ? 'Yes' : 'No'}">No</dd></div>
+			<div><dt>Terms accepted</dt><dd th:text="${account.termsAcceptedAt == null ? 'Not recorded' : account.termsAcceptedAt}">Not recorded</dd></div>
+			<div><dt>Terms version</dt><dd th:text="${account.termsVersion == null ? '—' : account.termsVersion}">—</dd></div>
+		</dl>
+	</section>
+	<section class="panel">
+		<h2>Account actions</h2>
+		<div class="account-actions">
+			<form th:if="${account.role.name() == 'OWNER'}" method="post"
+					th:action="@{/admin/users/{username}/demote(username=${account.username})}">
+				<button class="button primary" type="submit">Change to Viewer</button>
+			</form>
+			<form th:if="${account.active and account.username != username}" method="post"
+					th:action="@{/admin/users/{username}/deactivate(username=${account.username})}">
+				<button class="button secondary" type="submit">Deactivate account</button>
+			</form>
+			<form th:if="${!account.active}" method="post"
+					th:action="@{/admin/users/{username}/activate(username=${account.username})}">
+				<button class="button primary" type="submit">Reactivate account</button>
+			</form>
+		</div>
+		<div class="danger-zone" th:if="${account.username != username}">
+			<div><strong>Delete account</strong><p class="muted">This permanently removes the account and its access grants.</p></div>
+			<form method="post" th:action="@{/admin/users/{username}/delete(username=${account.username})}"
+					onsubmit="return confirm('Permanently delete this account? Owned documents must be transferred to an active Owner.')">
+				<label th:for="${'transfer-' + account.username}">Transfer owned documents to an active Owner (if needed)</label>
+				<select th:id="${'transfer-' + account.username}" name="transferToUsername">
+					<option value="">No transfer</option>
+					<option th:each="target : ${owners}" th:if="${target.username != account.username}"
+							th:value="${target.username}" th:text="${target.fullName + ' (' + target.username + ')'}"></option>
+				</select>
+				<button class="button danger-outline" type="submit">Delete user</button>
+			</form>
+		</div>
+		<p class="muted">Account status, role changes, and deletion are recorded in the audit trail.</p>
+	</section>
+</main>
+</body>
+</html>

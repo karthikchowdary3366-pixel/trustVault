@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>User management · TrustVault</title>
+	<link rel="stylesheet" th:href="@{/css/app.css}">
+	<script th:src="@{/js/theme.js}" defer></script>
+</head>
+<body>
+<header class="topbar">
+	<a class="brand" th:href="@{/documents}"><span class="brand-mark small">TV</span> TrustVault</a>
+	<nav><a th:href="@{/documents}">Documents</a><a class="active" th:href="@{/admin/users}">Users</a><a th:href="@{/admin/activity}">Audit activity</a></nav>
+	<div class="user-menu"><span th:text="${username}">admin</span>
+		<a class="settings-link" th:href="@{/account/settings}" aria-label="Account settings" title="Account settings">
+			<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1-2.4 2.4-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6v.2h-3.4v-.2a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1-2.4-2.4.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.6-1H4v-3.4h.2a1.7 1.7 0 0 0 1.6-1 1.7 1.7 0 0 0-.3-1.9l-.1-.1 2.4-2.4.1.1a1.7 1.7 0 0 0 1.9.3 1.7 1.7 0 0 0 1-1.6V3h3.4v.2a1.7 1.7 0 0 0 1 1.6 1.7 1.7 0 0 0 1.9-.3l.1-.1 2.4 2.4-.1.1a1.7 1.7 0 0 0-.3 1.9 1.7 1.7 0 0 0 1.6 1h.2v3.4H21a1.7 1.7 0 0 0-1.6 1Z"></path></svg>
+		</a>
+		<form method="post" th:action="@{/logout}"><button class="link-button" type="submit">Sign out</button></form>
+	</div>
+</header>
+<main class="page">
+	<section class="page-heading">
+		<div><p class="eyebrow">ADMINISTRATION</p><h1>User management</h1>
+			<p class="muted">Create Viewer or Owner accounts, manage roles and account status, and remove accounts. Admin accounts cannot be created here.</p></div>
+		<a class="button primary" th:href="@{/admin/users/new}">Add user</a>
+	</section>
+	<div class="alert success" th:if="${notice}" th:text="${notice}"></div>
+	<div class="alert error" th:if="${error}" th:text="${error}"></div>
+	<section class="panel documents-panel">
+		<div class="table-wrap">
+			<table>
+				<thead><tr><th>Name</th><th>Email</th><th>Username</th><th>Role</th><th>Status</th><th>Details</th></tr></thead>
+				<tbody>
+				<tr th:each="account : ${users}">
+					<td th:text="${account.fullName == null ? '—' : account.fullName}">Name</td>
+					<td th:text="${account.email == null ? '—' : account.email}">Email</td>
+					<td th:text="${account.username}">username</td>
+					<td><span class="role-pill" th:text="${account.role}">VIEWER</span></td>
+					<td th:text="${account.active ? 'Active' : 'Deactivated'}">Active</td>
+					<td>
+						<a class="button secondary small-button"
+								th:href="@{/admin/users/{username}(username=${account.username})}">User details</a>
+					</td>
+				</tr>
+				<tr th:if="${users.isEmpty()}"><td colspan="6" class="empty-inline">No user accounts found.</td></tr>
+				</tbody>
+			</table>
+		</div>
+	</section>
+	<footer>User creation, role and account-status changes, and account deletion are restricted to administrators and written to the audit trail. Select User details to view or manage an account. Admin accounts cannot be created here.</footer>
+</main>
+</body>
+</html>

@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title th:text="${status + ' · TrustVault'}">Error · TrustVault</title>
+	<link rel="stylesheet" th:href="@{/css/app.css}">
+	<script th:src="@{/js/theme.js}" defer></script>
+</head>
+<body class="login-page">
+<main class="login-card">
+	<div class="brand-mark">TV</div>
+	<p class="eyebrow">REQUEST NOT COMPLETED</p>
+	<h1 th:text="${status}">Error</h1>
+	<p th:text="${message}">The request could not be completed.</p>
+	<p class="muted">For privacy, a document that is missing and one you cannot access have the same response.</p>
+	<a class="button primary full" th:href="@{/documents}">Back to documents</a>
+</main>
+</body>
+</html>
