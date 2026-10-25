@@ -32,6 +32,32 @@ The H2 database is created under `./data`; uploaded files are kept under `./priv
 .\mvnw.cmd test
 ```
 
+## Run with Docker
+
+Requirements: Docker Desktop. From the project root, build the image and create/start the container:
+
+```powershell
+docker build -t trustvault:local .
+docker run -d --name trustvault `
+  -p 8081:8081 `
+  -e "DB_URL=jdbc:h2:file:/app/data/trustvault;DB_CLOSE_ON_EXIT=FALSE" `
+  -e "DB_USER=sa" `
+  -e "DB_PASSWORD=" `
+  -e "TRUSTVAULT_STORAGE_DIR=/app/private-files" `
+  -v trustvault-data:/app/data `
+  -v trustvault-files:/app/private-files `
+  trustvault:local
+```
+
+Open <http://localhost:8081>. The named Docker volumes retain the database and uploaded files when the container is stopped or removed. Stop and start the existing container with:
+
+```powershell
+docker stop trustvault
+docker start trustvault
+```
+
+To remove the container, run `docker rm -f trustvault`. This does not remove the named volumes; remove them separately with `docker volume rm trustvault-data trustvault-files` only if you also intend to permanently delete the stored database and uploaded files. This configuration uses the development defaults and is not suitable for a publicly exposed deployment; configure production secrets, database, and SMTP before deploying.
+
 ## Configuration
 
 | Variable | Default | Purpose |
